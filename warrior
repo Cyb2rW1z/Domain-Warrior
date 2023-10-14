@@ -1,88 +1,87 @@
 #!/bin/bash
 
-# Define color code for red
+
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Function to perform a zone transfer
+
 perform_zone_transfer() {
     echo -e "${RED}[+] Performing DNS Zone Transfer for $1${NC}"
     dig +short axfr $1
 }
 
-# Function to resolve DNS records
+
 resolve_dns_records() {
     echo -e "${RED}[+] Resolving DNS records for $1${NC}"
     dig +short $1
 }
 
-# Function to find the IP address for a domain
+
 find_ip_address() {
     echo -e "${RED}[+] Finding IP address for $1${NC}"
     dig +short A $1
 }
 
-# Function to check MX records
+
 check_mx_records() {
     echo -e "${RED}[+] Checking MX records for $1${NC}"
     dig +short MX $1
 }
 
-# Function to check TXT records
+
 check_txt_records() {
     echo -e "${RED}[+] Checking TXT records for $1${NC}"
     dig +short TXT $1
 }
 
-# Function to check NS records
+
 check_ns_records() {
     echo -e "${RED}[+] Checking NS records for $1${NC}"
     dig +short NS $1
 }
 
-# Function to retrieve SSL certificate information
+
 get_ssl_certificate() {
     echo -e "${RED}[+] Retrieving SSL Certificate Information for $1${NC}"
     echo | openssl s_client -connect $1:443 -servername $1 2>/dev/null | openssl x509 -noout -text
 }
 
-# Function to fetch web server header information
 get_web_server_headers() {
     echo -e "${RED}[+] Fetching Web Server Header Information for $1${NC}"
     curl -I $1
 }
 
-# Function to perform subdomain enumeration with subfinder
+
 perform_subdomain_enum() {
     echo -e "${RED}[+] Performing Subdomain Enumeration for $1${NC}"
     subfinder -d $1 -o subdomains.txt
 }
 
-# Function to perform httprobe on available domains
+
 perform_httprobe() {
     echo -e "${RED}[+] Performing httprobe on available domains${NC}"
     cat subdomains.txt | httprobe -c 50 -t 3000 >> httprobe_results.txt
 }
 
-# Function to track ASNs using amass
+
 track_asns() {
     echo -e "${RED}[+] Tracking ASNs for $1${NC}"
     amass intel -org -d $1 -whois -ip >> asns.txt
 }
 
-# Function to perform reverse DNS lookup
+
 reverse_dns_lookup() {
     echo -e "${RED}[+] Reverse DNS Lookup for $1${NC}"
     # Add the reverse DNS lookup command here (e.g., host or dig)
 }
 
-# Function to track domain registrar
+
 track_domain_registrar() {
     echo -e "${RED}[+] Tracking Domain Registrar for $1${NC}"
     # Add the domain registrar tracking command here (e.g., whois)
 }
 
-# Function to perform reverse WHOIS lookup
+
 reverse_whois_lookup() {
     echo -e "${RED}[+] Performing Reverse WHOIS Lookup for $1${NC}"
     whois $1
@@ -91,43 +90,43 @@ reverse_whois_lookup() {
 main() {
     read -p "Enter the domain : " domain
 
-    # Perform Zone Transfer
+
     perform_zone_transfer $domain
 
-    # Resolve DNS Records
+
     resolve_dns_records $domain
 
-    # Find IP Address
+
     ip_address=$(find_ip_address $domain)
 
     if [ -n "$ip_address" ]; then
         echo -e "${RED}[+] IP Address for $domain: $ip_address${NC}"
-        # Reverse DNS Lookup
+   
         reverse_dns_lookup $ip_address
-        # Check MX records
+
         check_mx_records $domain
-        # Check TXT records
+
         check_txt_records $domain
-        # Check NS records
+      
         check_ns_records $domain
-        # Get SSL Certificate
+    
         get_ssl_certificate $domain
-        # Get Web Server Header Information
+   
         get_web_server_headers $domain
     else
         echo -e "${RED}[-] IP Address not found for $domain${NC}"
     fi
 
-    # Perform Subdomain Enumeration
+
     perform_subdomain_enum $domain
 
-    # Perform httprobe on available domains
+ 
     perform_httprobe
 
-    # Track ASNs
+
     track_asns $domain
 
-    # Reverse WHOIS Lookup
+
     reverse_whois_lookup $domain
 }
 

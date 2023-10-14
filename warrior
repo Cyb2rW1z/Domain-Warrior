@@ -1,45 +1,37 @@
 #!/bin/bash
 
-
 RED='\033[0;31m'
-NC='\033[0m' # No Color
-
+NC='\033[0m'
 
 perform_zone_transfer() {
     echo -e "${RED}[+] Performing DNS Zone Transfer for $1${NC}"
     dig +short axfr $1
 }
 
-
 resolve_dns_records() {
     echo -e "${RED}[+] Resolving DNS records for $1${NC}"
     dig +short $1
 }
-
 
 find_ip_address() {
     echo -e "${RED}[+] Finding IP address for $1${NC}"
     dig +short A $1
 }
 
-
 check_mx_records() {
     echo -e "${RED}[+] Checking MX records for $1${NC}"
     dig +short MX $1
 }
-
 
 check_txt_records() {
     echo -e "${RED}[+] Checking TXT records for $1${NC}"
     dig +short TXT $1
 }
 
-
 check_ns_records() {
     echo -e "${RED}[+] Checking NS records for $1${NC}"
     dig +short NS $1
 }
-
 
 get_ssl_certificate() {
     echo -e "${RED}[+] Retrieving SSL Certificate Information for $1${NC}"
@@ -51,36 +43,30 @@ get_web_server_headers() {
     curl -I $1
 }
 
-
 perform_subdomain_enum() {
     echo -e "${RED}[+] Performing Subdomain Enumeration for $1${NC}"
     subfinder -d $1 -o subdomains.txt
 }
-
 
 perform_httprobe() {
     echo -e "${RED}[+] Performing httprobe on available domains${NC}"
     cat subdomains.txt | httprobe -c 50 -t 3000 >> httprobe_results.txt
 }
 
-
 track_asns() {
     echo -e "${RED}[+] Tracking ASNs for $1${NC}"
     amass intel -org -d $1 -whois -ip >> asns.txt
 }
 
-
 reverse_dns_lookup() {
     echo -e "${RED}[+] Reverse DNS Lookup for $1${NC}"
-
+    dig +short -x $1
 }
-
 
 track_domain_registrar() {
     echo -e "${RED}[+] Tracking Domain Registrar for $1${NC}"
- 
+    whois $1
 }
-
 
 reverse_whois_lookup() {
     echo -e "${RED}[+] Performing Reverse WHOIS Lookup for $1${NC}"
@@ -88,47 +74,33 @@ reverse_whois_lookup() {
 }
 
 main() {
-    read -p "Enter the domain : " domain
-
+    read -p "Enter the domain to query: " domain
 
     perform_zone_transfer $domain
 
-
     resolve_dns_records $domain
-
 
     ip_address=$(find_ip_address $domain)
 
     if [ -n "$ip_address" ]; then
         echo -e "${RED}[+] IP Address for $domain: $ip_address${NC}"
-   
         reverse_dns_lookup $ip_address
-
         check_mx_records $domain
-
         check_txt_records $domain
-      
         check_ns_records $domain
-    
         get_ssl_certificate $domain
-   
         get_web_server_headers $domain
     else
         echo -e "${RED}[-] IP Address not found for $domain${NC}"
     fi
 
-
     perform_subdomain_enum $domain
 
- 
     perform_httprobe
 
-
     track_asns $domain
-
 
     reverse_whois_lookup $domain
 }
 
 main
-

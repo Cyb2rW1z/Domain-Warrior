@@ -72,13 +72,13 @@ track_asns() {
 
 reverse_dns_lookup() {
     echo -e "${RED}[+] Reverse DNS Lookup for $1${NC}"
-    # Add the reverse DNS lookup command here (e.g., host or dig)
+
 }
 
 
 track_domain_registrar() {
     echo -e "${RED}[+] Tracking Domain Registrar for $1${NC}"
-    # Add the domain registrar tracking command here (e.g., whois)
+ 
 }
 
 
